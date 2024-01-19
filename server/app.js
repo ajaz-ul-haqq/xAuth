@@ -1,22 +1,17 @@
 const express = require("express");
-const mysql = require("mysql2")
 const morgan = require("morgan")
 const cors = require("cors")
-const app =  express();
-const models = require('./models')
-
+const multer = require('multer');
+const upload = multer();
 require("dotenv").config()
 
-// Middlewares
-
-// Routes
-
+const app =  express();
 app.use(morgan('dev'))
 app.use(cors({origin : true, credentials : true}))
-app.use(express.urlencoded({ extended: false }));
 
 const authRoutes = require('./routes/auth')
 const adminRoutes = require('./routes/admin')
+const models = require('./models')
 
 async function isAdmin(req, res, next) {
     if(!req.headers['x-auth']) {
@@ -40,14 +35,17 @@ async function isAdmin(req, res, next) {
     }
 }
 
+
+app.post('/init', [upload.none(), (req, res) => {
+    res.json({
+        'success' : true,
+        'message' : 'Form submitted successfully!',
+        'data' : req.body
+    });
+}]);
 app.use('/api/auth', authRoutes);
 
 app.use('/api/admin', [isAdmin, adminRoutes])
-
-
-/**
- * if upto this moment no route is matched, its time for frontend;
- */
 
 app.all('*', function (req, res) {
     res.json({
@@ -56,8 +54,6 @@ app.all('*', function (req, res) {
         'message' : 'Invalid Api Endpoint'
     })
 })
-
-// Server
 
 const port = process.env.PORT || 9801;
 
