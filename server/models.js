@@ -8,6 +8,10 @@ const oauthTokens =  function () {
     return new BaseModel('auth_tokens');
 }
 
+const userTokens = (userId) => function () {
+    return oauthTokens().where('user_id', userId).get();
+}
+
 module.exports =  {
-    users, oauthTokens
+    users, oauthTokens, userTokens
 }
